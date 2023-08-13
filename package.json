@@ -1,0 +1,22 @@
+{
+  "name": "c1-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "eventsource": "^2.0.2",
+    "jsonwebtoken": "^9.0.1",
+    "minimist": "^1.2.8",
+    "node-pre-gyp": "^0.17.0",
+    "simple-peer": "^9.11.1",
+    "wrtc": "^0.4.7"
+  }
+}
