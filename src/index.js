@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.clear();
 const argv = require('minimist')(process.argv.slice(2));
 const utils = require('./utils');
 const peers = require('./utils/peers');
@@ -38,7 +39,7 @@ const initHub = async () => {
     /**
      * The keys are generated, we use the privateKey to sign the client token (this token will be used by worker nodes).
      * At this stage we don't need to share the publicKey with anyone, we are just generating the `address` by hashing
-     * the publicKey (SHA-256), in the future we can use the publicKey shared with the `lighthouse` to prevent impersonation.
+     * the publicKey (SHA-256), in the future we can use the publicKey shared with the `lighthouse` to prevent impersonation(already implemented).
      * The `address` is to find the publicKey in the db.
      */
   }
@@ -71,7 +72,9 @@ const initWorker = async k => {
 
 if(apiKey) {
   initWorker(apiKey);
+  global._role = 'worker';
 }
 else {
+  global._role = 'hub';
   initHub();
 }

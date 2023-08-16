@@ -7,8 +7,6 @@ const {
   LIGHTHOUSE_URL = 'http://localhost:3000'
 } = process.env;
 
-console.log(LIGHTHOUSE_URL)
-
 const getKeyPair = async () => {
   if(!fs.existsSync('./key')) {
     fs.mkdirSync('./key', { recursive: true });

@@ -1,5 +1,6 @@
 const wrtc = require('wrtc');
 const Peer = require('simple-peer');
+const peerEvents = require('./events');
 
 const peers = {};
 
@@ -30,13 +31,12 @@ const createPeer = (id, config) => {
 
   peer._id = id;
   peers[id] = peer;
+  global.peers = peers;
   peer.on('connect', () => {
     console.log('------------------------');
-    console.log(`Peer (${id}) connected.`);
+    console.log(`Peer (${id}) connected. `);
     console.log('------------------------');
-    setTimeout(() => { // Remove soon
-      peer.send(`${Math.random().toFixed(2) * 100} from ${peer._id}`);
-    }, 1000);
+    peerEvents.onConnect(peers, peer);
   });
 
   peer.on('data', data => {
