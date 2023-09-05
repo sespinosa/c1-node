@@ -51,6 +51,7 @@ const initHub = async () => {
 const initWorker = async k => {
   try {
     const clientid = utils.generateClientId();
+    global._clientid = clientid;
     console.log(`Starting as Worker, id: '${clientid}'`);
     const headers = {
       token: apiKey,

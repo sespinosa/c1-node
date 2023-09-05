@@ -1,6 +1,10 @@
 # Local keys
 key
 
+# shared folders and w folder
+shared
+w
+
 # Logs
 logs
 *.log

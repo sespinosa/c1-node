@@ -8,6 +8,7 @@ const {
 } = process.env;
 
 const getKeyPair = async () => {
+
   if(!fs.existsSync('./key')) {
     fs.mkdirSync('./key', { recursive: true });
     const kp = await generateKeyPair();
@@ -15,6 +16,19 @@ const getKeyPair = async () => {
     fs.writeFileSync('./key/x.pub', kp.publicKey);
     return kp;
   }
+
+  if(global._role === "hub") {
+    // Bootstrap
+    if(!fs.existsSync('./shared')) {
+      fs.mkdirSync('./shared');
+      if(!fs.existsSync('./shared/files')) fs.mkdirSync('./shared/files');
+      if(!fs.existsSync('./shared/wasm')) fs.mkdirSync('./shared/wasm');
+      if(!fs.existsSync('./shared/api')) fs.mkdirSync('./shared/api');
+    }
+  }
+  // The worker folder bootstrap is created in the './src/utils/file-share/index.js' file,
+  // because this is a POC and the folder will be namespaced with the peer._id in the meantime, like './w/{_id}/files'
+  
   const privateKey = fs.readFileSync('./key/x').toString();
   const publicKey = fs.readFileSync('./key/x.pub').toString();
   const address = crypto.createHash('sha256').update(publicKey).digest('hex');
