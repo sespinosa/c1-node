@@ -1,14 +1,14 @@
 {
   "name": "c1-node",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Company--1's Node",
   "main": "src/index.js",
   "scripts": {
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "git log --format='%aN <%aE>' | sort -u > AUTHORS",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
