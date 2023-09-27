@@ -28,7 +28,7 @@ const getKeyPair = async () => {
   }
   // The worker folder bootstrap is created in the './src/utils/file-share/index.js' file,
   // because this is a POC and the folder will be namespaced with the peer._id in the meantime, like './w/{_id}/files'
-  
+
   const privateKey = fs.readFileSync('./key/x').toString();
   const publicKey = fs.readFileSync('./key/x.pub').toString();
   const address = crypto.createHash('sha256').update(publicKey).digest('hex');
@@ -40,13 +40,13 @@ const generateKeyPair = () => new Promise((resolve, reject) => {
   crypto.generateKeyPair(
     "rsa",
     {
-      modulusLength: 2048, 
+      modulusLength: 2048,
       publicKeyEncoding: {
-        type: "pkcs1",
+        type: "spki",
         format: "pem"
       },
       privateKeyEncoding: {
-        type: "pkcs1",
+        type: "pkcs8",
         format: "pem"
       },
     },
@@ -77,7 +77,7 @@ const generateClientId = (l = 16) => crypto.randomBytes(l).toString('hex');
 const connectSSE = (headers = {}, onConnect, onMessage) => {
   const es = new EventSource(`${LIGHTHOUSE_URL}/lighthouse/sse`, { headers });
   es.addEventListener('open', () => {
-    if(onConnect) onConnect();  
+    if(onConnect) onConnect();
   });
 
   es.addEventListener('message', e => {
