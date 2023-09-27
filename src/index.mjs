@@ -1,11 +1,16 @@
-require('dotenv').config();
-console.clear();
-const argv = require('minimist')(process.argv.slice(2));
-const utils = require('./utils');
-const peers = require('./utils/peers');
+/*!
+ * c1-node - entry file
+ */
 
+"use strict";
 
-const apiKey = argv.k || argv.key || argv.apikey;
+/**
+ * Program dependencies.
+ */
+import "dotenv/config";
+import minimist from "minimist";
+import * as utils from "./utils/index.js";
+import * as peers from "./utils/peers/index.js";
 
 const initHub = async () => {
   try {
@@ -18,7 +23,7 @@ const initHub = async () => {
     console.log(`npm start -- -k ${token}`);
     console.log('\n');
     console.log('#########################################################');
-    
+
     const headers = {
       publickey: Buffer.from(publicKey).toString('base64'),
       token,
@@ -71,11 +76,26 @@ const initWorker = async k => {
   }
 };
 
-if(apiKey) {
-  initWorker(apiKey);
-  global._role = 'worker';
+/**
+ * Entry point of the program.
+ */
+const main = (argv, env) => {
+  const apiKey = argv.k || argv.key || argv.apikey;
+
+  // HUB or WORKER?
+
+  if (apiKey) {
+    global._role = 'worker';
+    initWorker(apiKey);
+  } else {
+    global._role = 'hub';
+    initHub();
+  }
 }
-else {
-  global._role = 'hub';
-  initHub();
-}
+
+main(
+  minimist(process.argv.slice(2)),
+  {
+    LIGHTHOUSE_URL: process.env.LIGHTHOUSE_URL || 'http://localhost:3000'
+  }
+);
