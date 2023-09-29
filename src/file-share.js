@@ -1,3 +1,14 @@
+/*!
+ * c1-node - file-share module
+ */
+
+"use strict";
+
+/**
+ * File Sharing module.
+ * @module file-share
+ */
+
 /**
  * Here we handle the p2p file-sharing, we will start with the star topology beacause mesh can get pretty hard.
  * Steps:
@@ -7,9 +18,13 @@
  *  - size in bytes
  *  - file name
  */
-const path = require('path');
-const fs = require('fs');
-const fsP = require('fs/promises');
+
+/**
+ * Module dependencies.
+ */
+import fs from 'fs';
+import fsP from 'fs/promises';
+import path from 'path';
 
 const startSync = async (peer) => {
   if(global._role === 'hub') {
@@ -50,4 +65,7 @@ const createChannelAndSend = (fileName, peer) => {
 
 const receiveFiles = async () => {};
 
-module.exports = { startSync, receiveFiles };
+export {
+  startSync,
+  receiveFiles
+};

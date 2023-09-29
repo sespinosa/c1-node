@@ -9,8 +9,8 @@
  */
 import "dotenv/config";
 import minimist from "minimist";
-import * as utils from "./utils.mjs";
-import * as peers from "./utils/peers/index.js";
+import * as peers from "./peers.js";
+import * as utils from "./utils.js";
 
 /**
  * Initializes HUB node.
@@ -93,7 +93,7 @@ const initWorker = (apiKey) => {
 /**
  * Entry point of the program.
  */
-const main = (argv, env) => {
+const main = (argv) => {
   const apiKey = argv.k || argv.key || argv.apikey;
 
   // HUB or WORKER?
@@ -109,7 +109,4 @@ const main = (argv, env) => {
 
 main(
   minimist(process.argv.slice(2)),
-  {
-    LIGHTHOUSE_URL: process.env.LIGHTHOUSE_URL || "http://localhost:3000"
-  }
 );

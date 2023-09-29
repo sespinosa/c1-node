@@ -17,9 +17,17 @@ import fs from "fs";
 import * as jose from "jose";
 import EventSource from "eventsource";
 
+/**
+ * Module variables.
+ */
+
 const {
   LIGHTHOUSE_URL = 'http://localhost:3000'
 } = process.env;
+
+//
+// KEY PAIR stuff
+//
 
 /**
  * Generates public / private keys and also returns `address`.
@@ -75,6 +83,10 @@ export const getKeyPair = async () => {
 
   return { publicKey, privateKey, address };
 };
+
+//
+// TOKEN stuff
+//
 
 /**
  * Creates a token.

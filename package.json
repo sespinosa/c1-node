@@ -2,7 +2,8 @@
   "name": "c1-node",
   "version": "0.1.0",
   "description": "Company--1's Node",
-  "main": "src/index.mjs",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"

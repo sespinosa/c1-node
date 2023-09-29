@@ -1,6 +1,20 @@
-const Peer = require('simple-peer');
-const wrtc = require('wrtc');
-const fs = require('fs');
+/*!
+ * c1-node - events module
+ */
+
+"use strict";
+
+/**
+ * Events module.
+ * @module events
+ */
+
+/**
+ * Module dependencies.
+ */
+import Peer from 'simple-peer';
+import wrtc from 'wrtc';
+import fs from 'fs';
 
 const onConnect = (peers, peer) => {
   createMesh(peers, peer);
@@ -29,11 +43,11 @@ const createMesh = (peers, peer, iceServers) => {
         setTimeout(() => {
           const ds = p._pc.createDataChannel(`mesh_signal_${peer._id}`);
           const dsl = peer._pc.createDataChannel(`mesh_signal_emitter_${k}`);
-  
+
           ds.addEventListener('message', data => {
             dsl.send(data.data);
           });
-  
+
           dsl.addEventListener('message', data => {
             ds.send(data.data);
           });
@@ -69,13 +83,13 @@ const createMesh = (peers, peer, iceServers) => {
         }
 
       }
-      
+
       if(cname.indexOf('mesh_signal_') === 0) {
         const is_emitter = cname.indexOf('mesh_signal_emitter_') === 0;
         const newPeer = new Peer({ trickle: true, wrtc, iceServers, initiator: is_emitter });
-        
+
         newPeer._id = cname.split('_').pop();
-        
+
         newPeer.on('connect', () => {
           console.log(`mesh peer "${newPeer._id}" connected.`);
           peers[newPeer._id] = newPeer;
@@ -99,7 +113,6 @@ const createMesh = (peers, peer, iceServers) => {
 
 };
 
-
-module.exports = {
+export {
   onConnect
 };

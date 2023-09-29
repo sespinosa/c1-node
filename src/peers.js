@@ -1,7 +1,21 @@
-const wrtc = require('wrtc');
-const Peer = require('simple-peer');
-const peerEvents = require('./events');
-const fileShare = require('../file-share');
+/*!
+ * c1-node - peers module
+ */
+
+"use strict";
+
+/**
+ * Peers module.
+ * @module peers
+ */
+
+/**
+ * Module dependencies.
+ */
+import Peer from "simple-peer";
+import wrtc from "wrtc";
+import * as fileShare from "./file-share.js";
+import * as peerEvents from "./events.js";
 
 const peers = {};
 
@@ -80,7 +94,7 @@ const createPeer = (id, config) => {
   return peer;
 };
 
-module.exports = {
+export {
   peers,
   createPeer,
 };
