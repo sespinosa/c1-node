@@ -9,7 +9,7 @@
  */
 import "dotenv/config";
 import minimist from "minimist";
-import * as utils from "./utils/index.js";
+import * as utils from "./utils.mjs";
 import * as peers from "./utils/peers/index.js";
 
 /**
@@ -39,7 +39,7 @@ const initHub = async () => {
     console.log("\nnpm start -- -k %s\n\n", token);
 
     const headers = {
-      publickey: Buffer.from(publicKey).toString('base64'),
+      publickey: Buffer.from(publicKey).toString("base64"),
       token,
     };
 
@@ -99,10 +99,10 @@ const main = (argv, env) => {
   // HUB or WORKER?
 
   if (apiKey) {
-    global._role = 'worker';
+    global._role = "worker";
     initWorker(apiKey);
   } else {
-    global._role = 'hub';
+    global._role = "hub";
     initHub();
   }
 }
@@ -110,6 +110,6 @@ const main = (argv, env) => {
 main(
   minimist(process.argv.slice(2)),
   {
-    LIGHTHOUSE_URL: process.env.LIGHTHOUSE_URL || 'http://localhost:3000'
+    LIGHTHOUSE_URL: process.env.LIGHTHOUSE_URL || "http://localhost:3000"
   }
 );
