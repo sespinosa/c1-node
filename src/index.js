@@ -76,7 +76,7 @@ const initHub = async () => {
       const { clientid, payload } = ev;
 
       if (!peers.peers[clientid]) {
-        const peer = peers.createPeer(clientid, { initiator: false });
+        const peer = peers.create(clientid, { initiator: false });
 
         peer.on("signal", (s) => utils.reply({ clientid, ...headers }, s));
       }
@@ -108,7 +108,7 @@ const initWorker = (apiKey) => {
     utils.connectSSE(
       headers,
       () => {
-        const peer = peers.createPeer("hub", { initiator: true });
+        const peer = peers.create("hub", { initiator: true });
 
         peer.on("signal", (s) => utils.reply(headers, s));
       }, (ev) => {

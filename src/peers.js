@@ -12,12 +12,18 @@
 /**
  * Module dependencies.
  */
+
+// third-party
 import Peer from "simple-peer";
 import wrtc from "wrtc";
+
+// local
 import * as fileShare from "./file-share.js";
 import * as peerEvents from "./events.js";
 
-const peers = {};
+/**
+ * Module variables.
+ */
 
 const iceServers = [
   {
@@ -35,8 +41,12 @@ const iceServers = [
   }
 ];
 
-const createPeer = (id, config) => {
+export const peers = {};
 
+/**
+ * Creates a peer with provided id.
+ */
+export const create = (id, config) => {
   const peer = new Peer({
     trickle: true,
     wrtc,
@@ -48,53 +58,46 @@ const createPeer = (id, config) => {
   peers[id] = peer;
   global.peers = peers;
 
-  peer.on('connect', () => {
-    console.log('------------------------');
-    console.log(`Peer (${id}) connected. `);
-    console.log('------------------------');
+  peer.on("connect", () => {
+    console.log(`Peer (${id}) connected.`);
     peerEvents.onConnect(peers, peer, iceServers);
     fileShare.startSync(peer);
   });
 
-  peer.on('data', data => {
-    console.log(data.toString());
+  peer.on("data", (d) => {
+    console.log(d.toString());
   });
 
-  peer.on('error', err => {
+  peer.on("error", (e) => {
     delete peers[id];
-    console.error('Error: ', err);
+    console.error("Error: ", e);
   });
 
-  peer._pc.addEventListener('connectionstatechange', (ev) => {
-    /**
-     * For some reason `simple-peer` (and also Peerjs) are not triggering some events,
-     * and based on: https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/connectionstatechange_event
-     * it looks like the latest implementation of WRTC relies on the "connectionstatechange" for the mayority
-     * of events instead of using event listeners per event basis.
-     * Possible events:
-     * - new
-     * - connecting
-     * - connected
-     * - disconnected
-     * - closed
-     * - failer
-     */
+  peer._pc.addEventListener("connectionstatechange", () => {
+    // `simple-peer` (same with PeerJS) is not triggering some events.
+    //
+    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/connectionstatechange_event
+    //
+    // It looks like the latest implementation of WRTC relies on
+    // `connectionstatechange` for the majority of events instead of a
+    // per event basis.
+    //
+    // Possible events:
+    // - new
+    // - connecting
+    // - connected
+    // - disconnected
+    // - closed
+    // - failed
+
     const { connectionState } = peer._pc;
 
-    // console.log(`Peer (${peer._id}) state changed to: ${connectionState}`);
-
-    if( connectionState === "disconnected" ) {
+    switch (connectionState) {
+    case "disconnected":
       console.log(`Peer "${peer._id}" disconnected.`);
       delete peers[peer._id];
     }
-
-    // console.log("peers: ", Object.keys(peers));
   });
 
   return peer;
-};
-
-export {
-  peers,
-  createPeer,
 };
