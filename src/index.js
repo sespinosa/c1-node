@@ -7,8 +7,15 @@
 /**
  * Program dependencies.
  */
+
+// runtime
+import fs from "fs";
+
+// third-party
 import "dotenv/config";
 import minimist from "minimist";
+
+// local
 import * as peers from "./peers.js";
 import * as utils from "./utils.js";
 
@@ -17,6 +24,26 @@ import * as utils from "./utils.js";
  */
 const initHub = async () => {
   try {
+    // Bootstrap HUB folder
+
+    if (!fs.existsSync('./shared')) {
+      // TODO make directories configurable, probably with global
+      // constant
+
+      // TODO keeping comment as it is, but will remove later
+      //
+      // The worker folder bootstrap is created in the
+      // './src/file-share.js' file, because this is a POC and the
+      // folder will be namespaced with the peer._id in the meantime,
+      // like './w/{_id}/files'
+
+      fs.mkdirSync('./shared');
+
+      fs.existsSync('./shared/files') || fs.mkdirSync('./shared/files');
+      fs.existsSync('./shared/wasm') || fs.mkdirSync('./shared/wasm');
+      fs.existsSync('./shared/api') || fs.mkdirSync('./shared/api');
+    }
+
     // We use privateKey to sign client token (this token will be used
     // by worker nodes).
 
@@ -27,9 +54,11 @@ const initHub = async () => {
     // already implemented, why the mention is still here? Check if it's
     // true.
 
+    const { privateKey, publicKey } = await utils.getKeyPair();
+
     // `address` is used to find publickey in the database.
 
-    const { privateKey, publicKey, address } = await utils.getKeyPair();
+    const address = utils.getAddress(publicKey);
 
     console.log("Starting HUB at", address);
 

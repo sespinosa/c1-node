@@ -12,8 +12,12 @@
 /**
  * Module dependencies.
  */
+
+// runtime
 import crypto from "crypto";
 import fs from "fs";
+
+// third-party
 import * as jose from "jose";
 import EventSource from "eventsource";
 
@@ -22,71 +26,58 @@ import EventSource from "eventsource";
  */
 
 const {
-  LIGHTHOUSE_URL = 'http://localhost:3000'
+  LIGHTHOUSE_URL = "http://localhost:3000"
 } = process.env;
 
 //
-// KEY PAIR stuff
+// AUTHENTICATION stuff
 //
 
 /**
- * Generates public / private keys and also returns `address`.
+ * Generates private / public RSA encoded key pair.
  */
 const generateKeyPair = async () => {
   const { publicKey, privateKey } = await jose.generateKeyPair("RS256");
 
   const publicPEM = await jose.exportSPKI(publicKey);
   const privatePEM = await jose.exportPKCS8(privateKey);
-  const address = crypto.createHash("sha256").update(publicPEM).digest("hex");
 
   return {
     privateKey: privatePEM,
     publicKey: publicPEM,
-    address,
   }
 };
 
 /**
- * Returns public / private keys, together with `address`
+ * Returns private / public RSA encoded key pair, storing them for
+ * future use when first executed.
  */
 export const getKeyPair = async () => {
-  // TODO this shouldn't be here. I need to reallocate this bootstrap
-  // stuff
+  if (!fs.existsSync("./key")) {
+    fs.mkdirSync("./key");
 
-  if(global._role === "hub") {
-    // Bootstrap
+    const keyPair = await generateKeyPair();
 
-    // The worker folder bootstrap is created in the
-    // './src/utils/file-share/index.js' file, because this is a POC and
-    // the folder will be namespaced with the peer._id in the meantime,
-    // like './w/{_id}/files'
+    fs.writeFileSync("./key/x", keyPair.privateKey);
+    fs.writeFileSync("./key/x.pub", keyPair.publicKey);
 
-    if(!fs.existsSync('./shared')) {
-      fs.mkdirSync('./shared');
-      if(!fs.existsSync('./shared/files')) fs.mkdirSync('./shared/files');
-      if(!fs.existsSync('./shared/wasm')) fs.mkdirSync('./shared/wasm');
-      if(!fs.existsSync('./shared/api')) fs.mkdirSync('./shared/api');
-    }
+    return keyPair;
   }
 
-  if(!fs.existsSync('./key')) {
-    fs.mkdirSync('./key', { recursive: true });
-    const kp = await generateKeyPair();
-    fs.writeFileSync('./key/x', kp.privateKey);
-    fs.writeFileSync('./key/x.pub', kp.publicKey);
-    return kp;
-  }
+  const privateKey = fs.readFileSync("./key/x").toString();
+  const publicKey = fs.readFileSync("./key/x.pub").toString();
 
-  const privateKey = fs.readFileSync('./key/x').toString();
-  const publicKey = fs.readFileSync('./key/x.pub').toString();
-  const address = crypto.createHash('sha256').update(publicKey).digest('hex');
-
-  return { publicKey, privateKey, address };
+  return {
+    publicKey,
+    privateKey,
+  };
 };
 
-//
-// TOKEN stuff
-//
+/**
+ * Returns a hash built from publicKey (needs to be in PEM format).
+ */
+export const getAddress = (publicKey) =>
+  crypto.createHash("sha256").update(publicKey).digest("hex");
 
 /**
  * Creates a token.
@@ -109,34 +100,15 @@ export const createToken = async (privateKey, address) => {
   return token;
 };
 
-const generateClientId = (l = 16) => crypto.randomBytes(l).toString('hex');
+/**
+ * Generates a random client ID.
+ */
+export const generateClientId = (l = 16) =>
+  crypto.randomBytes(l).toString("hex");
 
-const connectSSE = (headers = {}, onConnect, onMessage) => {
-  const es = new EventSource(`${LIGHTHOUSE_URL}/lighthouse/sse`, { headers });
-  es.addEventListener('open', () => {
-    if(onConnect) onConnect();
-  });
-
-  es.addEventListener('message', e => {
-    const event = JSON.parse(e.data);
-    if(onMessage) onMessage(event);
-  });
-
-  es.addEventListener('error', e => {
-    console.error(e);
-  });
-};
-
-const reply = (headers = {}, payload) => {
-  fetch(`${LIGHTHOUSE_URL}/lighthouse/r`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    },
-    body: JSON.stringify(payload)
-  }).catch(console.error)
-}
+//
+// SSE
+//
 
 /**
  * Pending:
@@ -144,8 +116,41 @@ const reply = (headers = {}, payload) => {
  * - Add the mechanism for the hub to respond (needs to parse n -> 1 events).
  */
 
-export {
-  generateClientId,
-  connectSSE,
-  reply
+/**
+ * Connects to Lighthouse's EventSource
+ */
+export const connectSSE = (headers = {}, onConnect, onMessage) => {
+  const es = new EventSource(`${LIGHTHOUSE_URL}/lighthouse/sse`, { headers });
+
+  es.addEventListener("open", () => {
+    if (onConnect) {
+      onConnect();
+    }
+  });
+
+  es.addEventListener("message", (m) => {
+    if (onMessage) {
+      const event = JSON.parse(m.data);
+
+      onMessage(event);
+    }
+  });
+
+  es.addEventListener("error", (e) => {
+    console.error(e);
+  });
 };
+
+/**
+ * Forwards messages to Replies endpoint.
+ */
+export const reply = (headers = {}, payload) => {
+  fetch(`${LIGHTHOUSE_URL}/lighthouse/r`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers
+    },
+    body: JSON.stringify(payload)
+  }).catch(console.error)
+}
